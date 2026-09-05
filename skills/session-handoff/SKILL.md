@@ -40,14 +40,41 @@ changed since they last ran. If a check hasn't been run since the last edit, say
 
 ## 3. Where the file goes
 
-Repo root, as `SESSION_HANDOFF.md`. If the user works across a main checkout plus git
-worktrees, put it in the checkout they will resume in, and say in the file which one that
-is.
+**The directory the user is working in** — the session's working directory — as
+`SESSION_HANDOFF.md`.
+
+Write it nowhere else. Not a parent directory, not a repo root the session is not sitting
+in, not a scratch or temp directory. If the user works across a main checkout plus git
+worktrees, that means the one they will resume in — and say in the file which one that is.
 
 Don't commit it unless the user asks. If they want it out of git, offer `.gitignore` or
 `.claude/SESSION_HANDOFF.md` — their call, mention it once.
 
-## 4. Structure
+## 4. Point CLAUDE.md at it
+
+Claude Code auto-loads `CLAUDE.md`. It does **not** auto-load `SESSION_HANDOFF.md` — that
+filename has no special meaning to the harness. A handoff nothing points to is a handoff
+nobody reads.
+
+So after writing the handoff, handle `CLAUDE.md` in the same directory:
+
+| Situation | Do |
+|---|---|
+| It already mentions `SESSION_HANDOFF.md` | Leave it alone — don't duplicate the pointer |
+| It exists, with no mention | Add a short pointer near the top |
+| It doesn't exist | Create it, with that pointer as its first section |
+
+Two or three lines is enough:
+
+```markdown
+**Read `SESSION_HANDOFF.md` first.** It carries the state, settled decisions, and open
+items from the previous session — reading it avoids re-deriving work already done.
+```
+
+Creating a `CLAUDE.md` that holds only this pointer is fine. Don't pad it with a project
+description you'd be inventing.
+
+## 5. Structure
 
 Follow `reference/template.md`. Sections, in order:
 
@@ -69,7 +96,7 @@ Drop a section only when it would be genuinely empty. "Decisions already settled
 `reference/example.md` is a full worked example written to this standard. Read it when the
 template alone doesn't settle a question of tone or granularity.
 
-## 5. What earns a place
+## 6. What earns a place
 
 - **Exact identifiers.** Commit SHAs, PR URLs, absolute paths, branch names, real port
   numbers, file names. Never "the recent commit" or "the config file".
@@ -83,7 +110,7 @@ template alone doesn't settle a question of tone or granularity.
   and say what's there. Duplicating it makes both stale.
 - **Absolute dates.** "2026-09-02", never "yesterday" or "last week".
 
-## 6. What doesn't
+## 7. What doesn't
 
 - Anything `git log` or `git diff` already tells you. The value here is what the repo
   *cannot* record: intent, rejected options, verbal decisions, tool quirks.
@@ -93,14 +120,14 @@ template alone doesn't settle a question of tone or granularity.
 - Speculation dressed as fact. If something is a guess, label it: "possibly not a real
   shipped feature — confirm before authoring".
 
-## 7. Length
+## 8. Length
 
 Aim for 60–120 lines. Short enough that the next session actually reads it before
 starting; long enough to carry the decisions. If it runs past ~150 lines, the overflow
 usually belongs in a linked plan file, not here.
 
-## 8. Close out
+## 9. Close out
 
-Tell the user the file is written and where. If the session ended with something
-undecided or waiting on them, restate that one item — it's the thing most likely to be
-lost across a `/clear`.
+Tell the user the file is written and where, and whether you touched `CLAUDE.md`. If the
+session ended with something undecided or waiting on them, restate that one item — it's
+the thing most likely to be lost across a `/clear`.

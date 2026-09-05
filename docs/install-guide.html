@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>session-handoff — Install &amp; Usage Guide</title>
+<style>
+  @page {
+    size: A4;
+    margin: 18mm 16mm 16mm 16mm;
+  }
+
+  :root {
+    --ink:      #1a1d23;
+    --ink-soft: #4a5160;
+    --ink-mute: #6b7280;
+    --rule:     #d8dce3;
+    --rule-lt:  #e8ebef;
+    --accent:   #2f4a7a;
+    --accent-lt:#eef2f8;
+    --code-bg:  #f5f6f8;
+    --warn-bg:  #fdf6e8;
+    --warn-br:  #d9a441;
+    --good-br:  #4a7a5e;
+    --good-bg:  #eef5f0;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  /* ---------- title block ---------- */
+
+  .title-block {
+    border-bottom: 2.5px solid var(--accent);
+    padding-bottom: 12px;
+    margin-bottom: 22px;
+  }
+
+  .eyebrow {
+    font-size: 7.5pt;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    font-size: 25pt;
+    line-height: 1.1;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+
+  h1 .mono-title {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 22pt;
+  }
+
+  .standfirst {
+    font-size: 11pt;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+    max-width: 46em;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 26px;
+    font-size: 8pt;
+    color: var(--ink-mute);
+    flex-wrap: wrap;
+  }
+
+  .meta-row b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ---------- headings ---------- */
+
+  h2 {
+    font-size: 13pt;
+    margin: 26px 0 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--rule);
+    letter-spacing: -0.01em;
+    font-weight: 700;
+    break-after: avoid;
+  }
+
+  h2 .num {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    margin-right: 9px;
+    font-weight: 700;
+  }
+
+  h3 {
+    font-size: 10.5pt;
+    margin: 18px 0 6px;
+    font-weight: 700;
+    color: var(--ink);
+    break-after: avoid;
+  }
+
+  p { margin: 0 0 9px; max-width: 48em; }
+
+  a { color: var(--accent); text-decoration: none; }
+
+  code {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    background: var(--code-bg);
+    border: 1px solid var(--rule-lt);
+    border-radius: 3px;
+    padding: 0.5px 4px;
+  }
+
+  /* ---------- command blocks ---------- */
+
+  .cmd {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+    border-radius: 3px;
+    padding: 9px 12px;
+    margin: 9px 0 12px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 9pt;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    break-inside: avoid;
+  }
+
+  .cmd .prompt { color: var(--ink-mute); user-select: none; }
+  .cmd .out    { color: var(--ink-mute); }
+  .cmd .ok     { color: var(--good-br); font-weight: 600; }
+
+  /* ---------- steps ---------- */
+
+  .step {
+    display: flex;
+    gap: 12px;
+    margin: 0 0 4px;
+    break-inside: avoid;
+  }
+
+  .step-num {
+    flex: 0 0 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-size: 9pt;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+  }
+
+  .step-body { flex: 1; min-width: 0; }
+  .step-body h3 { margin-top: 0; }
+
+  /* ---------- tables ---------- */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 14px;
+    font-size: 9pt;
+    break-inside: avoid;
+  }
+
+  th {
+    text-align: left;
+    font-size: 7.5pt;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    border-bottom: 1.5px solid var(--rule);
+    padding: 0 10px 5px 0;
+    font-weight: 700;
+  }
+
+  td {
+    padding: 6px 10px 6px 0;
+    border-bottom: 1px solid var(--rule-lt);
+    vertical-align: top;
+  }
+
+  td:first-child { white-space: nowrap; }
+
+  td code { background: none; border: none; padding: 0; }
+
+  tr:last-child td { border-bottom: none; }
+
+  /* ---------- callouts ---------- */
+
+  .note {
+    border-left: 3px solid var(--warn-br);
+    background: var(--warn-bg);
+    padding: 8px 12px;
+    margin: 12px 0;
+    font-size: 9pt;
+    break-inside: avoid;
+  }
+
+  .note.good {
+    border-left-color: var(--good-br);
+    background: var(--good-bg);
+  }
+
+  .note b { display: block; margin-bottom: 2px; }
+  .note p { margin: 0; max-width: none; }
+
+  /* ---------- sample document ---------- */
+
+  .sample {
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: #fcfcfd;
+    padding: 12px 14px;
+    margin: 10px 0 14px;
+    font-size: 8.5pt;
+    line-height: 1.5;
+    break-inside: avoid;
+  }
+
+  .sample .fname {
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 7.5pt;
+    color: var(--ink-mute);
+    border-bottom: 1px solid var(--rule-lt);
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+  }
+
+  .sample h4 {
+    font-size: 9pt;
+    margin: 9px 0 3px;
+    font-weight: 700;
+  }
+
+  .sample h4:first-of-type { margin-top: 0; }
+
+  .sample p { margin: 0 0 5px; font-size: 8.5pt; max-width: none; }
+
+  .sample .dim { color: var(--ink-mute); font-style: italic; }
+
+  /* ---------- trigger phrases ---------- */
+
+  .phrases {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 10px 0 12px;
+  }
+
+  .phrase {
+    background: var(--accent-lt);
+    border: 1px solid #ccd7e8;
+    border-radius: 11px;
+    padding: 3px 11px;
+    font-size: 8.5pt;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  /* ---------- layout helpers ---------- */
+
+  .page-break { break-before: page; }
+  .avoid-break { break-inside: avoid; }
+
+  footer {
+    margin-top: 26px;
+    padding-top: 10px;
+    border-top: 1px solid var(--rule);
+    font-size: 8pt;
+    color: var(--ink-mute);
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="title-block">
+  <div class="eyebrow">Claude Code Plugin</div>
+  <h1><span class="mono-title">session-handoff</span></h1>
+  <p class="standfirst">
+    Ends every working session with a document the next session reads first — so it resumes
+    your work without re-deriving decisions, re-checking state, or repeating dead ends.
+  </p>
+  <div class="meta-row">
+    <span><b>Version</b> 0.2.0</span>
+    <span><b>License</b> MIT</span>
+    <span><b>Repository</b> github.com/anish00700/claude-session-handoff</span>
+  </div>
+</div>
+
+<h2><span class="num">1</span>The problem it solves</h2>
+
+<p>
+  Long sessions end one of two ways: you run <code>/clear</code>, or the context window quietly
+  fills up. Either way the next session starts blind. It re-reads files you already read, re-asks
+  questions you already answered, and — the expensive one — sometimes retries the exact approach
+  that failed three hours ago.
+</p>
+
+<p>
+  A handoff file fixes that, but only if it records what a repository <i>cannot</i>: intent,
+  rejected options, decisions made out loud, and the tool quirks you discovered the hard way.
+  Your commit history already covers the rest.
+</p>
+
+<p>
+  This plugin adds one skill that writes and maintains that file. It runs the git commands to
+  verify state rather than trusting recall, records failed attempts alongside the reason they
+  failed, and names what is deliberately <i>not</i> done — the three things that save the most
+  time downstream.
+</p>
+
+<h2><span class="num">2</span>Before you start</h2>
+
+<table>
+  <tr>
+    <td style="width:130px"><b>Claude Code</b></td>
+    <td>Any version with plugin support. Check with <code>claude --version</code>.</td>
+  </tr>
+  <tr>
+    <td><b>Git</b></td>
+    <td>The skill runs <code>git status</code>, <code>git log</code>, and <code>git worktree list</code>
+        to verify state. It works outside a repository, with less to go on.</td>
+  </tr>
+  <tr>
+    <td><b>GitHub access</b></td>
+    <td>Only to fetch the marketplace, once. The repository is public — no token or SSH key needed.</td>
+  </tr>
+</table>
+
+<h2><span class="num">3</span>Install</h2>
+
+<p>Two commands, run from anywhere. Both are one-time.</p>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h3>Add the marketplace</h3>
+    <p>This registers where the plugin lives. It clones the repository into your local plugin cache.</p>
+    <div class="cmd"><span class="prompt">$ </span>claude plugin marketplace add anish00700/claude-session-handoff
+
+<span class="out">Adding marketplace…
+Cloning repository, validating marketplace…</span>
+<span class="ok">✔ Successfully added marketplace: claude-session-handoff</span></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h3>Install the plugin</h3>
+    <p>
+      The <code>@</code> suffix names the marketplace to install from. It is required — without it,
+      Claude Code searches every marketplace you have registered.
+    </p>
+    <div class="cmd"><span class="prompt">$ </span>claude plugin install session-handoff@claude-session-handoff
+
+<span class="ok">✔ Successfully installed plugin: session-handoff@claude-session-handoff (scope: user)</span></div>
+  </div>
+</div>
+
+<p>
+  <b>Scope: user</b> means it is available in every project on your machine, not just the current
+  one. That is the right default for this plugin — a handoff is useful in any repository.
+</p>
+
+<h3>Verify</h3>
+
+<div class="cmd"><span class="prompt">$ </span>claude plugin list
+
+<span class="out">Installed plugins:
+
+  ❯ session-handoff@claude-session-handoff
+    Version: 0.2.0
+    Scope: user
+    Status: </span><span class="ok">✔ enabled</span></div>
+
+<div class="note good">
+  <b>Restart your session</b>
+  <p>Skills load at session start. If you installed while a session was running, start a new one
+     before the skill becomes available.</p>
+</div>
+
+<div class="page-break"></div>
+
+<h2><span class="num">4</span>Using it</h2>
+
+<p>
+  There is nothing to configure and no command to memorise. The skill activates on its own when
+  a session is winding down — say any of these in plain language:
+</p>
+
+<div class="phrases">
+  <span class="phrase">wrap up</span>
+  <span class="phrase">write the handoff</span>
+  <span class="phrase">hand this off</span>
+  <span class="phrase">I'm about to clear</span>
+  <span class="phrase">save state</span>
+  <span class="phrase">update the handoff</span>
+</div>
+
+<p>
+  It also triggers when your context window is running low, which is the case that matters most —
+  that is precisely when work is about to be lost and you are least likely to remember to ask.
+</p>
+
+<p>
+  Installed skills also appear in the slash-command list. Run <code>/help</code> in a session to
+  see the exact name on your setup.
+</p>
+
+<h3>What happens</h3>
+
+<p>
+  The skill reads any existing handoff first, runs git and <code>gh</code> commands to confirm the
+  real state, then writes <code>SESSION_HANDOFF.md</code> to the directory you are working in. On later
+  sessions it <b>replaces</b> that file rather than appending — carrying forward what is still
+  open and dropping what got resolved. Handoffs never stack up.
+</p>
+
+<div class="note">
+  <b>It is not committed automatically</b>
+  <p>The file is written to disk and left untracked. Commit it if your team should see it, or add
+     it to <code>.gitignore</code> if it is just for you.</p>
+</div>
+
+<h3>It keeps CLAUDE.md pointing at the handoff</h3>
+
+<p>
+  Claude Code auto-loads <code>CLAUDE.md</code>, but <code>SESSION_HANDOFF.md</code> has no
+  special meaning to it — a handoff nothing points to is a handoff nobody reads. So after
+  writing, the skill checks for a <code>CLAUDE.md</code> beside the handoff: it adds a short
+  pointer if there is none, creates the file if it does not exist, and leaves it untouched if
+  the handoff is already mentioned.
+</p>
+
+<h2><span class="num">5</span>What it produces</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:34%">Section</th><th>What it carries</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><b>Header</b></td><td>Absolute date, what to read next, which handoff this supersedes</td></tr>
+    <tr><td><b>State in one line</b></td><td>Where things stand, for someone who reads nothing else</td></tr>
+    <tr><td><b>Where the work lives</b></td><td>Checkouts, worktrees, branches, key paths</td></tr>
+    <tr><td><b>What happened this session</b></td><td>Chronological — including attempts that failed, and why</td></tr>
+    <tr><td><b>Current exact state</b></td><td>Verified facts, marked so nobody re-checks them</td></tr>
+    <tr><td><b>Decisions already settled</b></td><td>Confirmed choices, marked don't-re-ask</td></tr>
+    <tr><td><b>Explicitly NOT done</b></td><td>Named gaps, and what is waiting on you</td></tr>
+    <tr><td><b>Operational notes</b></td><td>Gotchas, broken tooling, real port numbers, workarounds</td></tr>
+    <tr><td><b>Next step</b></td><td>The single first action, and what not to redo</td></tr>
+  </tbody>
+</table>
+
+<p>
+  Target length is 60–120 lines: short enough that the next session actually reads it before
+  starting, long enough to carry the decisions.
+</p>
+
+<h3>What the output looks like</h3>
+
+<p>
+  A fragment from the worked example bundled with the plugin. The project is invented; the shape
+  is what matters.
+</p>
+
+<div class="sample">
+  <div class="fname">SESSION_HANDOFF.md</div>
+
+  <h4>State in one line</h4>
+  <p><b>The Redis-backed rate limiter is written, tested, and open as a PR, but the production
+     cutover is gated behind a flag that is still off.</b> Work is on
+     <code>feat/redis-rate-limiter</code>, tip <code>9c41f0a</code> — CI green, one approval,
+     not merged.</p>
+
+  <h4>What happened this session</h4>
+  <p><b>2. First Lua implementation had a race — reverted.</b> The initial script did
+     <code>ZCARD</code> then <code>ZADD</code> as two round trips, so concurrent requests could
+     both read a count below the limit and both admit. It passed unit tests because those
+     exercised one goroutine at a time.</p>
+  <p class="dim">The mechanism matters: any implementation that reads the count and writes the
+     entry in separate round trips is wrong. Don't reintroduce a "simpler" two-call version.</p>
+
+  <h4>Explicitly NOT done / still open</h4>
+  <p><b>Load test at 3× peak</b> — not started. This is the merge blocker.<br>
+     <b>The production cutover itself</b> — the team's call, not something to do proactively.</p>
+</div>
+
+<p>
+  Note what the fragment does that a commit log cannot: it names the <i>mechanism</i> of a failure
+  so nobody retries it, and it distinguishes work that is unfinished from work that is deliberately
+  someone else's decision.
+</p>
+
+<div class="page-break"></div>
+
+<h2><span class="num">6</span>Maintaining the install</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:44%">Task</th><th>Command</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Update to the latest version</td><td><code>claude plugin update session-handoff@claude-session-handoff</code></td></tr>
+    <tr><td>Refresh the marketplace listing</td><td><code>claude plugin marketplace update claude-session-handoff</code></td></tr>
+    <tr><td>Temporarily disable</td><td><code>claude plugin disable session-handoff@claude-session-handoff</code></td></tr>
+    <tr><td>Re-enable</td><td><code>claude plugin enable session-handoff@claude-session-handoff</code></td></tr>
+    <tr><td>Remove the plugin</td><td><code>claude plugin uninstall session-handoff@claude-session-handoff</code></td></tr>
+    <tr><td>Remove the marketplace too</td><td><code>claude plugin marketplace remove claude-session-handoff</code></td></tr>
+  </tbody>
+</table>
+
+<p>Updates require a session restart to take effect.</p>
+
+<h2><span class="num">7</span>Troubleshooting</h2>
+
+<table>
+  <thead>
+    <tr><th style="width:40%">Symptom</th><th>Cause and fix</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>The skill never triggers</td>
+      <td>Skills load at session start. Restart, then confirm with <code>claude plugin list</code>
+          that status is <code>enabled</code>.</td>
+    </tr>
+    <tr>
+      <td><code>Repository not found</code> on marketplace add</td>
+      <td>Usually a typo in the owner/repo. The correct source is
+          <code>anish00700/claude-session-handoff</code>, and it is public — no credentials needed.</td>
+    </tr>
+    <tr>
+      <td>Two handoff skills appear</td>
+      <td>You have both this plugin and a local copy in <code>~/.claude/skills/</code>. Keep one:
+          uninstall the plugin, or delete the local directory.</td>
+    </tr>
+    <tr>
+      <td>A project version should win</td>
+      <td>A skill at <code>&lt;repo&gt;/.claude/skills/session-handoff/</code> takes precedence
+          inside that repository. Use this to keep a project-specific example.</td>
+    </tr>
+    <tr>
+      <td>The handoff states things that aren't true</td>
+      <td>The skill verifies with git before writing, but it cannot verify claims about intent.
+          Read it once and correct it — it is a normal Markdown file.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2><span class="num">8</span>Customising it</h2>
+
+<p>
+  The plugin is three plain Markdown files. Clone the repository, edit
+  <code>skills/session-handoff/SKILL.md</code> to change the section list or the writing rules, and
+  edit <code>reference/example.md</code> to swap the worked example for one from your own codebase.
+</p>
+
+<p>
+  A team-specific example is the single highest-value change you can make — the skill matches the
+  tone and granularity of whatever example it is shown. If you change the section list in
+  <code>SKILL.md</code>, update <code>reference/template.md</code> to match; they are meant to
+  stay in lockstep.
+</p>
+
+<p>
+  To distribute an internal variant, drop the edited skill into your repository at
+  <code>.claude/skills/session-handoff/</code> and commit it. Everyone who clones gets it with no
+  install step, and it overrides the public plugin inside that repository.
+</p>
+
+<footer>
+  <span>session-handoff v0.2.0 · MIT · Anish Patil</span>
+  <span>github.com/anish00700/claude-session-handoff</span>
+</footer>
+
+</body>
+</html>

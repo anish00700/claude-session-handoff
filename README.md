@@ -30,8 +30,14 @@ directly:
 /session-handoff
 ```
 
-It writes `SESSION_HANDOFF.md` to your repo root. On later sessions it reads the existing
-file, carries forward what's still open, and **replaces** it — handoffs never stack up.
+It writes `SESSION_HANDOFF.md` to **the directory you're working in** — never a parent,
+never a repo root you aren't sitting in. On later sessions it reads the existing file,
+carries forward what's still open, and **replaces** it — handoffs never stack up.
+
+Claude Code auto-loads `CLAUDE.md` but not `SESSION_HANDOFF.md`, so a handoff nothing
+points to is a handoff nobody reads. The skill closes that gap: after writing, it makes
+sure a `CLAUDE.md` sits beside the handoff carrying a pointer to it — creating one if none
+exists, and leaving it untouched if it already mentions the handoff.
 
 ## What it produces
 
