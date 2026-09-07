@@ -55,6 +55,23 @@ even where hooks are disabled.
 Requires `git` and `python3` (both near-universal on a machine running Claude Code). Without
 `python3` the hooks no-op silently rather than erroring.
 
+### What gets injected, and how far it's trusted
+
+Injecting a file into context automatically is a real trust decision, so the hook makes it
+explicitly rather than by accident:
+
+- **At most 50 KB is injected**, then truncated with a note. A handoff is normally a few KB;
+  anything past the cap is a mistake or an attack, and either way it must not silently consume
+  the context window before you've typed anything.
+- **A committed handoff is treated as untrusted.** If `SESSION_HANDOFF.md` is tracked in git, it
+  came with the repository and was written by whoever wrote the repository — not necessarily
+  you. Clone a repo, open Claude Code, and that file would otherwise land in context unread. So
+  tracked handoffs are framed as third-party data whose instructions carry no authority. An
+  *untracked* handoff is your own working copy's, and is framed as your previous session's notes.
+
+This is also why the skill writes a handoff you're not expected to commit, and why this repo
+[gitignores its own](.gitignore).
+
 ## What it produces
 
 A file with these sections, in order:
