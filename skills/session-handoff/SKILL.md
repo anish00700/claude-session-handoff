@@ -1,133 +1,95 @@
 ---
 name: session-handoff
-description: Write or refresh SESSION_HANDOFF.md — the document the next session reads first so it can resume work without re-deriving anything. Use at the end of a working session, before /clear or /compact, when context is running low, or when the user says "wrap up", "write the handoff", "hand this off", "I'm about to clear", "save state". Also use when asked to update, refresh, or supersede an existing handoff.
+description: Write or refresh SESSION_HANDOFF.md so the next session resumes without re-deriving anything. Use when wrapping up a session, before /clear or /compact, when context runs low, or on "write the handoff", "hand this off", "save state".
 ---
 
 # Session handoff
 
-Produce one file, `SESSION_HANDOFF.md`, that a fresh session with zero context can read
-and immediately continue the work — without re-deriving decisions, re-checking state, or
-repeating dead ends.
+Write `SESSION_HANDOFF.md` so a fresh session with zero context can resume the work without
+re-deriving decisions, re-checking state, or repeating dead ends.
 
-The test for every line: **would a competent stranger, holding only this file and the
-repo, do the right next thing?** If a line doesn't move them toward that, cut it.
+Test every line: **would a stranger holding only this file and the repo do the right next
+thing?** If not, cut it.
 
-## 1. Read the old handoff first
+## 1. Read the existing handoff first
 
-If `SESSION_HANDOFF.md` already exists, read it before writing. The new file **replaces**
-it in full — never append a new session's notes to the bottom, and never leave two
-handoffs side by side.
+If one exists, read it. The new file **replaces** it — never append, never leave two side by
+side. Carry forward what is still open, drop what this session resolved, and say in the header
+which dated handoff it supersedes.
 
-Carry forward everything from the old file that is still true and still open. Drop what
-this session resolved. Say explicitly in the header that this file supersedes the earlier
-one, with the earlier one's date.
+## 2. Verify — don't recall
 
-## 2. Verify state — do not write it from memory
-
-Your recollection of branch names, SHAs, and whether checks passed drifts over a long
-session. Confirm before writing:
+Branch names, SHAs and check results drift over a long session. Before writing:
 
 ```bash
 git status --short --branch && git log --oneline -15 && git worktree list
 ```
 
-Also check open PRs (`gh pr status`, or `gh pr view <n> --json state,mergeable,mergeStateStatus,statusCheckRollup`)
-when any exist.
+Add `gh pr view <n> --json state,mergeable,statusCheckRollup` when PRs are open.
 
-Re-run tests, lint, or build **only** if the handoff will state their result and code has
-changed since they last ran. If a check hasn't been run since the last edit, say so — write
-"not re-run since commit `abc1234`" rather than asserting it passes.
+Re-run tests only if the handoff states their result and code changed since. Otherwise write
+"not re-run since `abc1234`" rather than asserting a pass.
 
-## 3. Where the file goes
+## 3. Where it goes
 
-**The directory the user is working in** — the session's working directory — as
-`SESSION_HANDOFF.md`.
+The **session's working directory**, as `SESSION_HANDOFF.md`. Never a parent, never a repo root
+you aren't sitting in, never a scratch directory. Across worktrees, use the one being resumed
+and name it in the file.
 
-Write it nowhere else. Not a parent directory, not a repo root the session is not sitting
-in, not a scratch or temp directory. If the user works across a main checkout plus git
-worktrees, that means the one they will resume in — and say in the file which one that is.
-
-Don't commit it unless the user asks. If they want it out of git, offer `.gitignore` or
-`.claude/SESSION_HANDOFF.md` — their call, mention it once.
+Don't commit it unless asked. Offer `.gitignore` once if they'd rather it stay out of git.
 
 ## 4. Point CLAUDE.md at it
 
-Claude Code auto-loads `CLAUDE.md`. It does **not** auto-load `SESSION_HANDOFF.md` — that
-filename has no special meaning to the harness. A handoff nothing points to is a handoff
-nobody reads.
+Claude Code auto-loads `CLAUDE.md`, never `SESSION_HANDOFF.md` — a handoff nothing points to is
+one nobody reads. In the same directory: if `CLAUDE.md` mentions the handoff, leave it alone;
+if it exists without a mention, add a two-line pointer near the top; if absent, create it with
+that pointer. A `CLAUDE.md` holding only the pointer is fine — don't pad it with an invented
+project description.
 
-So after writing the handoff, handle `CLAUDE.md` in the same directory:
-
-| Situation | Do |
-|---|---|
-| It already mentions `SESSION_HANDOFF.md` | Leave it alone — don't duplicate the pointer |
-| It exists, with no mention | Add a short pointer near the top |
-| It doesn't exist | Create it, with that pointer as its first section |
-
-Two or three lines is enough:
-
-```markdown
-**Read `SESSION_HANDOFF.md` first.** It carries the state, settled decisions, and open
-items from the previous session — reading it avoids re-deriving work already done.
-```
-
-Creating a `CLAUDE.md` that holds only this pointer is fine. Don't pad it with a project
-description you'd be inventing.
-
-## 5. Structure
-
-Follow `reference/template.md`. Sections, in order:
+## 5. Sections, in order
 
 | Section | Carries |
 |---|---|
-| Header line | Date (absolute), why it was written, what to read after this, what it supersedes |
-| **State in one line** | Where the work stands right now, in bold, one or two sentences |
-| **Where the work lives** | Checkouts, worktrees, branches, key paths — only if more than one location is in play |
-| **What happened this session** | Numbered, chronological. Include attempts that failed and *why* |
-| **Current exact state** | Verified facts, marked as verified so nobody re-checks them |
+| Header | Absolute date, what to read next, which handoff this supersedes |
+| **State in one line** | Where things stand, for someone who reads nothing else |
+| **Where the work lives** | Checkouts, worktrees, branches, key paths — only if several are in play |
+| **What happened this session** | Numbered, chronological, including attempts that failed and why |
+| **Current exact state** | Verified facts, marked verified so nobody re-checks them |
 | **Decisions already settled** | Confirmed choices, marked don't-re-ask |
-| **Explicitly NOT done / still open** | Named gaps, plus what is undecided and waiting on the user |
-| **Operational notes** | Gotchas, broken tooling, real port numbers, workarounds discovered |
-| **Next step** | The single thing to do first, and what not to redo |
+| **Explicitly NOT done / still open** | Named gaps, and what is waiting on the user |
+| **Operational notes** | Gotchas, broken tooling, real ports, workarounds |
+| **Next step** | The single first action, and what not to redo |
 
-Drop a section only when it would be genuinely empty. "Decisions already settled" and
-"Explicitly NOT done" are the two that save the most work downstream — fight to fill them.
+Drop a section only when it would be genuinely empty. **Decisions already settled** and
+**Explicitly NOT done** save the most work downstream — fight to fill them.
 
-`reference/example.md` is a full worked example written to this standard. Read it when the
-template alone doesn't settle a question of tone or granularity.
+## 6. Include
 
-## 6. What earns a place
+- **Exact identifiers** — SHAs, PR URLs, absolute paths, branches, real ports. Never "the
+  recent commit".
+- **Dead ends, with the mechanism of the failure** — what stops the next session retrying them.
+- **Explicit negatives** — "don't touch `X/` on this branch", "the merge is not decided".
+  Absences are invisible unless named.
+- **Settled decisions with compressed reasoning**, so they get defended, not reopened.
+- **Pointers, not copies** — link the plan file or PR thread and say what is in it.
+- **Absolute dates** — "2026-09-02", never "yesterday".
 
-- **Exact identifiers.** Commit SHAs, PR URLs, absolute paths, branch names, real port
-  numbers, file names. Never "the recent commit" or "the config file".
-- **Dead ends and why they failed.** A fix that backfired is worth more than a fix that
-  worked — it stops the next session from trying it again.
-- **Explicit negatives.** "Do not touch `admin_guide/` on this branch." "PR merge is the
-  user's call, not decided." Absences are invisible unless named.
-- **Settled decisions with the reasoning compressed.** Enough that the next session
-  defends the decision rather than reopening it.
-- **Pointers, not copies.** If detail lives in a plan file, PR thread, or issue, link it
-  and say what's there. Duplicating it makes both stale.
-- **Absolute dates.** "2026-09-02", never "yesterday" or "last week".
+## 7. Omit
 
-## 7. What doesn't
-
-- Anything `git log` or `git diff` already tells you. The value here is what the repo
-  *cannot* record: intent, rejected options, verbal decisions, tool quirks.
-- Narration of your own process ("I then searched for…"). State conclusions.
-- Praise, self-assessment, or summary of how the session went.
-- Secrets, tokens, or credentials — even ones you saw in output.
-- Speculation dressed as fact. If something is a guess, label it: "possibly not a real
-  shipped feature — confirm before authoring".
+Anything `git log` or `git diff` already says; narration of your own process; praise or
+self-assessment; secrets and tokens; speculation unless labelled a guess.
 
 ## 8. Length
 
-Aim for 60–120 lines. Short enough that the next session actually reads it before
-starting; long enough to carry the decisions. If it runs past ~150 lines, the overflow
-usually belongs in a linked plan file, not here.
+60–120 lines. Past ~150 the overflow belongs in a linked plan file, not here.
 
 ## 9. Close out
 
-Tell the user the file is written and where, and whether you touched `CLAUDE.md`. If the
-session ended with something undecided or waiting on them, restate that one item — it's
-the thing most likely to be lost across a `/clear`.
+Say where the file is and whether you touched `CLAUDE.md`. Restate anything left undecided —
+that is what a `/clear` loses.
+
+---
+
+The table above is normally enough. Only if it isn't, load `reference/template.md` (a literal
+skeleton, ~800 tokens) or `reference/example.md` (a worked handoff for calibrating tone,
+~1,600 tokens).
