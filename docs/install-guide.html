@@ -306,7 +306,7 @@
     your work without re-deriving decisions, re-checking state, or repeating dead ends.
   </p>
   <div class="meta-row">
-    <span><b>Version</b> 0.2.1</span>
+    <span><b>Version</b> 0.3.0</span>
     <span><b>License</b> MIT</span>
     <span><b>Repository</b> github.com/anish00700/claude-session-handoff</span>
   </div>
@@ -345,6 +345,11 @@
     <td><b>Git</b></td>
     <td>The skill runs <code>git status</code>, <code>git log</code>, and <code>git worktree list</code>
         to verify state. It works outside a repository, with less to go on.</td>
+  </tr>
+  <tr>
+    <td><b>python3</b></td>
+    <td>Used by the plugin's hooks. If it is missing the hooks no-op silently — the skill still
+        works, you just lose the automatic loading.</td>
   </tr>
   <tr>
     <td><b>GitHub access</b></td>
@@ -395,7 +400,7 @@ Cloning repository, validating marketplace…</span>
 <span class="out">Installed plugins:
 
   ❯ session-handoff@claude-session-handoff
-    Version: 0.2.1
+    Version: 0.3.0
     Scope: user
     Status: </span><span class="ok">✔ enabled</span></div>
 
@@ -448,14 +453,22 @@ Cloning repository, validating marketplace…</span>
      it to <code>.gitignore</code> if it is just for you.</p>
 </div>
 
-<h3>It keeps CLAUDE.md pointing at the handoff</h3>
+<h3>It loads itself back, automatically</h3>
 
 <p>
-  Claude Code auto-loads <code>CLAUDE.md</code>, but <code>SESSION_HANDOFF.md</code> has no
-  special meaning to it — a handoff nothing points to is a handoff nobody reads. So after
-  writing, the skill checks for a <code>CLAUDE.md</code> beside the handoff: it adds a short
-  pointer if there is none, creates the file if it does not exist, and leaves it untouched if
-  the handoff is already mentioned.
+  Claude Code auto-loads <code>CLAUDE.md</code> but never <code>SESSION_HANDOFF.md</code>. The
+  plugin ships hooks that close the gap without you doing anything: at session start and after a
+  compaction, the handoff for your working directory is injected straight into context. Other
+  handoffs elsewhere in the repository are listed by path only, so a large repo costs a line
+  rather than a page.
+</p>
+
+<p>
+  When a handoff is written, a <code>CLAUDE.md</code> pointer appears beside it — and if the
+  handoff sits in a subdirectory, a second pointer is added to the <b>repository root</b>
+  <code>CLAUDE.md</code> naming the relative path. Without that, a session started at the root
+  would never learn the handoff exists. Everything is idempotent, and a silent no-op when there
+  is no handoff.
 </p>
 
 <h2><span class="num">5</span>What it produces</h2>
@@ -594,7 +607,7 @@ Cloning repository, validating marketplace…</span>
 </p>
 
 <footer>
-  <span>session-handoff v0.2.1 · MIT · Anish Patil</span>
+  <span>session-handoff v0.3.0 · MIT · Anish Patil</span>
   <span>github.com/anish00700/claude-session-handoff</span>
 </footer>
 

@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
   "name": "session-handoff",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Write SESSION_HANDOFF.md — the document the next session reads first so it can resume work without re-deriving decisions, re-checking state, or repeating dead ends. Triggers before /clear or /compact, when context runs low, or on \"wrap up\" and \"write the handoff\".",
   "author": {
     "name": "Anish Patil",

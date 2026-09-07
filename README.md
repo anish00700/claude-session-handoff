@@ -34,10 +34,24 @@ It writes `SESSION_HANDOFF.md` to **the directory you're working in** — never 
 never a repo root you aren't sitting in. On later sessions it reads the existing file,
 carries forward what's still open, and **replaces** it — handoffs never stack up.
 
-Claude Code auto-loads `CLAUDE.md` but not `SESSION_HANDOFF.md`, so a handoff nothing
-points to is a handoff nobody reads. The skill closes that gap: after writing, it makes
-sure a `CLAUDE.md` sits beside the handoff carrying a pointer to it — creating one if none
-exists, and leaving it untouched if it already mentions the handoff.
+## It loads itself back
+
+Claude Code auto-loads `CLAUDE.md` but not `SESSION_HANDOFF.md`, so a handoff nothing points
+to is a handoff nobody reads. The plugin closes that gap in two ways, both automatic:
+
+**Hooks that ship with the plugin.** On `SessionStart` and after a compaction, the handoff for
+your working directory is injected straight into context — no prompting, no remembering. Other
+handoffs elsewhere in the repo are listed by path only, so a large repo costs a line rather
+than a page. When a handoff is written, a `CLAUDE.md` pointer is created or updated beside it,
+and — if the handoff is in a subdirectory — a second pointer goes in the **repo root**
+`CLAUDE.md`, so a session started at the root still finds it. All of it is idempotent and a
+silent no-op when there's no handoff.
+
+**The skill itself** applies the same `CLAUDE.md` rule when it writes, so the behaviour holds
+even where hooks are disabled.
+
+Requires `git` and `python3` (both near-universal on a machine running Claude Code). Without
+`python3` the hooks no-op silently rather than erroring.
 
 ## What it produces
 

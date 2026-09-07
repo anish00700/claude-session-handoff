@@ -41,10 +41,14 @@ Don't commit it unless asked. Offer `.gitignore` once if they'd rather it stay o
 ## 4. Point CLAUDE.md at it
 
 Claude Code auto-loads `CLAUDE.md`, never `SESSION_HANDOFF.md` — a handoff nothing points to is
-one nobody reads. In the same directory: if `CLAUDE.md` mentions the handoff, leave it alone;
+one nobody reads. In the handoff's own directory: if `CLAUDE.md` mentions it, leave it alone;
 if it exists without a mention, add a two-line pointer near the top; if absent, create it with
 that pointer. A `CLAUDE.md` holding only the pointer is fine — don't pad it with an invented
 project description.
+
+**If the handoff is in a subdirectory of a git repo, add a second pointer to the root
+`CLAUDE.md`** naming the relative path. Without it a session started at the repo root never
+learns the handoff exists.
 
 ## 5. Sections, in order
 
