@@ -72,6 +72,31 @@ explicitly rather than by accident:
 This is also why the skill writes a handoff you're not expected to commit, and why this repo
 [gitignores its own](.gitignore).
 
+### What gets written to your files
+
+This plugin edits `CLAUDE.md` on your behalf. That's the whole point of it — a handoff nothing
+points to is a handoff nobody reads — but you should know the exact scope before installing:
+
+- **The trigger is narrow.** A `PostToolUse` hook runs after every `Write` and `Edit`, but exits
+  immediately unless the file just written is named exactly `SESSION_HANDOFF.md`. Editing
+  anything else does nothing.
+- **It writes to at most two files**, both named `CLAUDE.md`: one beside the handoff, and — only
+  when the handoff is in a subdirectory of a git repo — one at the repo root. Nothing else on
+  your disk is touched, and nothing is ever deleted or rewritten.
+- **It appends; it never edits what's already there.** The pointer goes at the end of the file
+  in a block delimited by `<!-- session-handoff:begin -->` and `<!-- session-handoff:end -->`.
+  Your existing content is not reformatted, reordered, or removed.
+- **It creates `CLAUDE.md` if there isn't one**, with an `# <directory name>` heading and the
+  pointer block. A `CLAUDE.md` containing only a pointer is the intended result.
+- **It's idempotent.** Run it a hundred times and you get one block. The root pointer is keyed
+  by the handoff's relative path, so several subdirectory handoffs each get one entry.
+- **It tells you.** Every write emits a message naming each file created or updated, so the
+  change shows up in your session rather than only in `git status`.
+
+To undo any of it, delete the marked block — or the file, if the plugin created it. To stop it
+happening, disable or uninstall the plugin; the hook ships with it and isn't separately
+configurable.
+
 ## What it produces
 
 A file with these sections, in order:
