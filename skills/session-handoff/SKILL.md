@@ -11,11 +11,22 @@ re-deriving decisions, re-checking state, or repeating dead ends.
 Test every line: **would a stranger holding only this file and the repo do the right next
 thing?** If not, cut it.
 
+**One project per handoff.** Record only what belongs to the project this file sits in.
+Sessions range wider — another repo, a client's codebase, an unrelated errand — and none of it
+belongs here: this file gets committed, cloned, and injected into other people's sessions, so a
+stray employer or client name travels with it. Cross-project work gets one neutral line
+("paused to help on an unrelated repo"); the details go in *that* project's handoff.
+
 ## 1. Read the existing handoff first
 
 If one exists, read it. The new file **replaces** it — never append, never leave two side by
 side. Carry forward what is still open, drop what this session resolved, and say in the header
 which dated handoff it supersedes.
+
+**If none exists, write one from scratch from this project's verified state** (step 2). Never
+seed it from elsewhere — not the invented project in `reference/example.md`, not the literal
+placeholders in `reference/template.md`, never another repo's handoff. A first handoff has no
+*supersedes* line and covers this session only; if you can't verify a thing, omit it.
 
 ## 2. Verify — don't recall
 
@@ -42,9 +53,11 @@ Don't commit it unless asked. Offer `.gitignore` once if they'd rather it stay o
 
 Claude Code auto-loads `CLAUDE.md`, never `SESSION_HANDOFF.md` — a handoff nothing points to is
 one nobody reads. In the handoff's own directory: if `CLAUDE.md` mentions it, leave it alone;
-if it exists without a mention, add a two-line pointer near the top; if absent, create it with
-that pointer. A `CLAUDE.md` holding only the pointer is fine — don't pad it with an invented
-project description.
+if it exists without a mention, append a short pointer block wrapped in
+`<!-- session-handoff:begin -->` / `<!-- session-handoff:end -->`; if absent, create it with
+that block. Use those exact markers — the plugin's hook keys off them, so the two stay
+idempotent instead of writing competing pointers. A `CLAUDE.md` holding only the pointer is
+fine — don't pad it with an invented project description.
 
 **If the handoff is in a subdirectory of a git repo, add a second pointer to the root
 `CLAUDE.md`** naming the relative path. Without it a session started at the repo root never
@@ -81,7 +94,8 @@ Drop a section only when it would be genuinely empty. **Decisions already settle
 ## 7. Omit
 
 Anything `git log` or `git diff` already says; narration of your own process; praise or
-self-assessment; secrets and tokens; speculation unless labelled a guess.
+self-assessment; secrets and tokens; speculation unless labelled a guess; **anything belonging
+to a different project** — see the one-project rule above.
 
 ## 8. Length
 
@@ -96,4 +110,5 @@ that is what a `/clear` loses.
 
 The table above is normally enough. Only if it isn't, load `reference/template.md` (a literal
 skeleton, ~800 tokens) or `reference/example.md` (a worked handoff for calibrating tone,
-~1,600 tokens).
+~1,600 tokens). **Copy their shape, never their content** — the example's project, paths and
+SHAs are invented; the template's angle-bracket placeholders are prompts, not text to emit.

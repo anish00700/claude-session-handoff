@@ -24,11 +24,13 @@ claude plugin install session-handoff@claude-session-handoff
 
 The skill triggers on its own when you say things like "wrap up", "write the handoff",
 "I'm about to clear", or "save state" — and when context is running low. To invoke it
-directly:
+directly, type:
 
-```bash
-/session-handoff
 ```
+/session-handoff:session-handoff
+```
+
+(Plugin skills are namespaced `plugin:skill`, which is why the name appears twice.)
 
 It writes `SESSION_HANDOFF.md` to **the directory you're working in** — never a parent,
 never a repo root you aren't sitting in. On later sessions it reads the existing file,

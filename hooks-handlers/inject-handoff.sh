@@ -28,7 +28,13 @@ dir="$(printf '%s\n' "$meta" | sed -n 2p)"
 [ -n "${event:-}" ] || event="SessionStart"
 [ -n "${dir:-}" ] && [ -d "$dir" ] || dir="$PWD"
 
+# Resolve to a physical path. git reports a symlink-resolved toplevel and `find` emits paths
+# under that resolved root, so an unresolved `dir` would build a `primary` that never matches
+# its own `find` entry — the loaded handoff would then also be listed as a not-loaded "other".
+dir="$(cd "$dir" 2>/dev/null && pwd -P)" || dir="$PWD"
+
 root="$(git -C "$dir" rev-parse --show-toplevel 2>/dev/null || true)"
+[ -n "$root" ] && root="$(cd "$root" 2>/dev/null && pwd -P || printf '%s' "$root")"
 
 primary=""
 for candidate in "$dir/SESSION_HANDOFF.md" "${root:+$root/SESSION_HANDOFF.md}"; do
@@ -44,7 +50,8 @@ if [ -n "$root" ]; then
               \( -name .git -o -name node_modules -o -name vendor -o -name target \
                  -o -name dist -o -name build -o -name .venv -o -name .next \) -prune \
               -o -name SESSION_HANDOFF.md -print 2>/dev/null \
-            | { [ -n "$primary" ] && grep -Fxv "$primary" || cat; } | sort)"
+            | { if [ -n "$primary" ]; then grep -Fxv -- "$primary" || true; else cat; fi } \
+            | sort)"
 fi
 
 [ -n "$primary" ] || [ -n "$others" ] || exit 0

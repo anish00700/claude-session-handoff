@@ -18,6 +18,11 @@ skills/session-handoff/
   reference/
     template.md        the section skeleton
     example.md         a worked example (invented project — keep it that way)
+hooks/
+  hooks.json           auto-discovered at the plugin root; no manifest key points at it
+hooks-handlers/
+  inject-handoff.sh    SessionStart + PostCompact — injects the handoff into context
+  claudemd-pointer.sh  PostToolUse (Write|Edit) — keeps CLAUDE.md pointing at the handoff
 docs/
   install-guide.html   source for the published install-guide PDF
 ```
@@ -30,6 +35,11 @@ docs/
   deliberately an invented project — never replace it with a real internal handoff.
 - **Bump `version` in `plugin.json` when the skill changes.** `claude plugin tag` validates
   that the manifest and the marketplace entry agree before tagging a release.
+- **`SESSION_HANDOFF.md` in this repo is gitignored on purpose — don't re-add it.** It is a
+  local development artifact. Tracked, it would ship to everyone who clones, and the
+  `SessionStart` hook would inject this project's build notes into their session. That is
+  exactly the cross-project contamination `SKILL.md` forbids; the plugin must not commit it.
+  The public worked example is `reference/example.md`.
 
 ## Validate before pushing
 

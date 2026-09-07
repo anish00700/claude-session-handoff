@@ -1,3 +1,10 @@
 .DS_Store
 *.swp
 node_modules/
+
+# This repo's own handoff is a local development artifact, not a deliverable.
+# It is deliberately untracked: if it shipped, cloning this repo would inject the
+# maintainer's build notes into the cloner's session via the SessionStart hook.
+# A handoff belongs to the project it documents and travels no further.
+# Use skills/session-handoff/reference/example.md as the public worked example.
+SESSION_HANDOFF.md
