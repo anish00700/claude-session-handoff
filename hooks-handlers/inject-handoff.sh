@@ -35,10 +35,15 @@ for candidate in "$dir/SESSION_HANDOFF.md" "${root:+$root/SESSION_HANDOFF.md}"; 
   [ -n "$candidate" ] && [ -f "$candidate" ] && { primary="$candidate"; break; }
 done
 
+# Other handoffs in the same repository. Pruned rather than filtered, so heavy vendor trees
+# are never walked; depth 8 covers realistic monorepo nesting. Never crosses into another
+# repository — `root` is this repo's toplevel, so separate projects stay isolated.
 others=""
 if [ -n "$root" ]; then
-  others="$(find "$root" -maxdepth 4 -name SESSION_HANDOFF.md \
-              -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null \
+  others="$(find "$root" -maxdepth 8 \
+              \( -name .git -o -name node_modules -o -name vendor -o -name target \
+                 -o -name dist -o -name build -o -name .venv -o -name .next \) -prune \
+              -o -name SESSION_HANDOFF.md -print 2>/dev/null \
             | { [ -n "$primary" ] && grep -Fxv "$primary" || cat; } | sort)"
 fi
 
@@ -68,9 +73,11 @@ if primary:
 
 if others:
     rel = [o[len(root) + 1:] if root and o.startswith(root + "/") else o for o in others]
+    shown, extra = rel[:20], len(rel) - 20
     parts.append(
         "Other session handoffs exist in this repository and were NOT loaded: "
-        + ", ".join(rel)
+        + ", ".join(shown)
+        + (f", and {extra} more" if extra > 0 else "")
         + ". Read one only if the work moves into that directory."
     )
 
