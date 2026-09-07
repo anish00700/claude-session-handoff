@@ -471,6 +471,95 @@ Cloning repository, validating marketplace…</span>
   is no handoff.
 </p>
 
+<h3>What gets injected, and how far it is trusted</h3>
+
+<p>
+  Putting a file into the model's context with no user action is a real trust decision, so the
+  hook makes it explicitly rather than by accident.
+</p>
+
+<table>
+  <thead>
+    <tr><th style="width:34%">Limit</th><th>Why it exists</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>50&nbsp;KB cap</b></td>
+      <td>A handoff is normally a few kilobytes, so anything past the cap is truncated with a
+          note. Without a limit an oversized file — a pasted log dump is enough — would consume
+          the context window before you had typed anything, and do it invisibly.</td>
+    </tr>
+    <tr>
+      <td><b>A committed handoff is treated as untrusted</b></td>
+      <td>If <code>SESSION_HANDOFF.md</code> is tracked in git, it came with the repository and
+          was written by whoever wrote the repository, who is not necessarily you. Tracked
+          handoffs are framed as third-party data whose instructions carry no authority. An
+          <i>untracked</i> handoff is your own working copy's, and keeps the previous-session
+          framing.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note good">
+  <b>The boundary falls out of the writing rule</b>
+  <p>A handoff is not meant to be committed — so a committed one did not come from this working
+     copy. The skill's own convention is what makes the distinction reliable.</p>
+</div>
+
+<h3>What it writes to your files</h3>
+
+<p>
+  The plugin edits <code>CLAUDE.md</code> on your behalf. That is the point of it — a handoff
+  nothing points to is a handoff nobody reads — but the scope is deliberately narrow.
+</p>
+
+<table>
+  <thead>
+    <tr><th style="width:34%">Behaviour</th><th>Detail</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><b>Trigger</b></td>
+      <td>A <code>PostToolUse</code> hook runs after every write or edit, and exits immediately
+          unless the file just written is named exactly <code>SESSION_HANDOFF.md</code>.</td>
+    </tr>
+    <tr>
+      <td><b>Files touched</b></td>
+      <td>At most two, both named <code>CLAUDE.md</code>: one beside the handoff, and — only when
+          the handoff is in a subdirectory of a git repository — one at the repository root.
+          Nothing else on disk is touched, and nothing is ever deleted.</td>
+    </tr>
+    <tr>
+      <td><b>How it writes</b></td>
+      <td>Appends a block delimited by
+          <code style="white-space:nowrap">&lt;!-- session-handoff:begin --&gt;</code> and
+          <code style="white-space:nowrap">&lt;!-- session-handoff:end --&gt;</code>. Your
+          existing content is never reformatted, reordered, or removed.</td>
+    </tr>
+    <tr>
+      <td><b>If there is no <code>CLAUDE.md</code></b></td>
+      <td>It creates one, with an <code>#&nbsp;&lt;directory name&gt;</code> heading and the
+          pointer block. A <code>CLAUDE.md</code> holding only a pointer is the intended result.</td>
+    </tr>
+    <tr>
+      <td><b>Repeat runs</b></td>
+      <td>Idempotent — one block however many times it runs. The root pointer is keyed by the
+          handoff's relative path, so several subdirectory handoffs each get their own entry.</td>
+    </tr>
+    <tr>
+      <td><b>Visibility</b></td>
+      <td>Every write emits a message naming each file created or updated, so it shows up in your
+          session rather than only in <code>git status</code>.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  To undo a write, delete the marked block — or the file, if the plugin created it. To stop it
+  happening, disable or uninstall the plugin: the hook ships with it and is not separately
+  configurable.
+</p>
+
 <h2><span class="num">5</span>What it produces</h2>
 
 <table>
